@@ -7,6 +7,21 @@ dotenv.config();
 
 const client = new Client( { intents: [GatewayIntentBits.Guilds]});
 
+// Create events based on the files in the events folder
+const eventsPath = path.join(__dirname, 'events');
+const eventsFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+
+for (const file of eventsFiles) {
+    const filePath = path.join(eventsPath, file);
+    const event = require(filePath);
+    if ( event.once ) {
+        client.once(event.name, (...args) => event.execute(client, ...args));
+    } else {
+        client.on(event.name, (...args) => event.execute(client, ...args));
+    }
+}
+
+// Creating commands based on files in commands folder
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
@@ -17,28 +32,5 @@ for ( const file of commandFiles ) {
 
     client.commands.set(command.data.name, command);
 }
-
-client.once('ready', () => {
-    console.log('Ready!');
-    });
-
-
-client.on('interactionCreate', async interaction => {
-	if (!interaction.isChatInputCommand()) return;
-
-    const command = client.commands.get(interaction.command);
-
-    if (!command) return;
-
-    try{
-        await command.execute(interaction);
-    } catch (error) {
-        console.error(error);
-        await interaction.reply({content: 'There was an error trying to execute that command!', ephemeral: true});
-    }
-
-});
-
-
 
 client.login(process.env.DISCORD_TOKEN);
