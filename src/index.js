@@ -5,7 +5,11 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const client = new Client( { intents: [GatewayIntentBits.Guilds]});
+const client = new Client( { intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildMessages]});
+
+//Set status to watching
+// client.user.setActivity('Watching you sleep');
+// client.user.setStatus
 
 // Create events based on the files in the events folder
 const eventsPath = path.join(__dirname, 'events');
@@ -15,7 +19,7 @@ for (const file of eventsFiles) {
     const filePath = path.join(eventsPath, file);
     const event = require(filePath);
     if ( event.once ) {
-        client.once(event.name, (...args) => event.execute(client, ...args));
+        client.once(event.name, (...args) => event.execute(...args));
     } else {
         client.on(event.name, (...args) => event.execute(client, ...args));
     }
