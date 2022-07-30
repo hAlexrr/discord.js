@@ -1,7 +1,9 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder} = require('discord.js');
+const { cacheAllUsersRoles } = require('../util/utility');
 const util = require('../util/utility');
 
 const role_timeout = '1002867030904541225'
+const timeout_channel = '1002867683995439114'
 
 const response = [
     'GLHF',
@@ -47,25 +49,37 @@ module.exports = {
 
     async execute(interaction) {
         const user = interaction.options.getUser('target');
-        const roles = interaction.options.getMember('target').roles
+        const member = interaction.options.getMember('target')
+        const roles = member.roles
         const pfp = user.avatarURL()
+
+        console.log(interaction)
        
         let yesVotes = 0;
-        let rolesCache = roles;
         
         //Generate a random number from 1 to 60
         const randomNumber = Math.floor(Math.random() * 2) + 1;
         const seconds = 5
 
-       // console.log(interaction)
+        if(user.id == interaction.user.id){
+            interaction.reply('You cannot vote to timeout yourself.', )
+            util.deleteReply(interaction)
+            return;
+        }
 
-        // console.log(user)
-
-        //Checking if user is in a voice channel
-        // if(!util.userInVoiceChannel(interaction, user.id)) {
-        //     interaction.reply(`${user} is not in a voice channel at this time. Vote will not be initiated.`);
-        //     return;
-        // }   
+        // Checking if user is in a voice channel
+        if(!util.userInVoiceChannel(interaction, user.id)) {
+            interaction.reply(`${user} is not in a voice channel at this time. Vote will not be initiated.`);
+            util.deleteReply(interaction)
+            return;
+        } 
+        
+        //Check if user and message author are in the same voice channel
+        if(util.getUserVoiceChannel(interaction, user.id) !== util.getUserVoiceChannel(interaction, interaction.user.id)) {
+            interaction.reply(`${user} is not in the same voice channel as you. Vote will not be initiated.`);
+            util.deleteReply(interaction)
+            return;
+        }
 
         const embed = new EmbedBuilder()
             .setColor('#00ff00')
@@ -89,6 +103,11 @@ module.exports = {
 
         const collector = message.createReactionCollector({filter,  time: seconds * 1000 });
 
+        //Get the users cached data
+        const serverRoles = util.getAllRoles(message)
+        const rolesCache = util.cacheAllUsersRoles(roles, serverRoles)
+        const cacheChannel = util.getUserVoiceChannel(interaction, user.id)
+
         collector.on('collect', (reaction, user) => {
             if(reaction.emoji.name === '👍') {
                 yesVotes++;
@@ -96,35 +115,64 @@ module.exports = {
             console.log(`Collected ${reaction.emoji.name} from ${user.username}`);
         });
 
-        // TODO - Implement removing all roles to user and setting role to timeout
         // TODO - Move member to timeout channel
         collector.on('end', collected => {
 
             console.log(`Collected all reactions from users. Yes: ${yesVotes} No: ${collected.size - yesVotes}`);
             
-           if( yesVotes / collected.size >= 0.75){
+            //If more than half of the votes are yes, timeout the user
+            if( yesVotes / collected.size >= 0.75){
 
-                interaction.followUp(`Vote was successful for ${user.username} to be muted for ${randomNumber} minutes. ${yesVotes} / ${collected.size} votes`);
-                // Remove all roles from user, and cache them, then add the role_timeout to the user.
+                // Get all roles on the server and cache them
+            
+                interaction.followUp(`Vote was successful for ${user} to be muted for ${randomNumber} minutes. ${yesVotes} / ${collected.size} votes`);
 
+                // // Check if user is in role_timeout
+                // if(util.userHasRole(roles, role_timeout)){
+                //     roles.remove(role_timeout)
+                // }
 
-                roles.cache.forEach(role => {
-                    roles.remove(role.id)
-                })
+                //Remove all roles from user, and cache roles before adding role_timeout to user
+                setTimeout(() => {
+                    util.removeAllUsersRoles(roles, serverRoles)
+                }, 1000);
                 
-                roles.add(role_timeout)
+
+                //Move user to timeout channel, and cache current channel
+                setTimeout(() => {
+                    util.moveUserToChannel(interaction, user.id, timeout_channel)  
+                }, 3000);
+                
+                //Add role_timeout to user
+                setTimeout(() => {
+                    util.setTimeoutRole(roles, role_timeout)
+                }, 1500);
 
                 setTimeout(() => {
                     console.log('Removed timeout role for ' + user.username)
-                    roles.remove(role_timeout)
-                    rolesCache.forEach(role => {
-                        roles.add(role.id)
-                    })
+                    console.log(cacheChannel)
+
+                    //setTimeout Remove role_timeout from user 5ms after timeout
+                    setTimeout(() => {
+                        util.removeTimeoutRole(roles, role_timeout)
+                    }, 1000)
+
+                    //Move user back to original channel, and give user all roles from cache
+                    setTimeout(() => {               
+                        util.addUserRoles(roles, rolesCache)
+                    }, 1500)
+
+                    setTimeout(() => {
+                        util.moveUserToChannel(interaction, user.id, cacheChannel)
+                    }, 3000)
+
+                    interaction.followUp(`${user} timeout has finished.`)
+
                 }, randomNumber * 60* 1000);
-           }
-
+            } else {
+                interaction.followUp(`Vote was unsuccessful for ${user} to be muted for ${randomNumber} minutes. ${yesVotes} / ${collected.size} votes`);
+                console.log('Vote was unsuccessful. ${yesVotes} / ${collected.size} votes')
+            }
         })
-
     }
-
 }
