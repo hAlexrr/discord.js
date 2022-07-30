@@ -1,5 +1,3 @@
-const { MessageFlags } = require("discord.js");
-
 module.exports = {
     userInVoiceChannel(interaction, userId) {      
         const userCheck = interaction.guild.members.cache.get(userId);

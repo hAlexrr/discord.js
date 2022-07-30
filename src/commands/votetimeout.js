@@ -1,5 +1,4 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder} = require('discord.js');
-const { cacheAllUsersRoles } = require('../util/utility');
 const util = require('../util/utility');
 
 const role_timeout = '1002867030904541225'
