@@ -63,6 +63,11 @@ module.exports = {
             return;
         }
 
+        if(this.getUserVoiceChannel(interaction, userId).id === channel_id){
+            interaction.followUp(`${userId} is already in this channe, Move has been cancelled.`);
+            return;
+        }
+
         const userCheck = interaction.guild.members.cache.get(userId);
 
 
