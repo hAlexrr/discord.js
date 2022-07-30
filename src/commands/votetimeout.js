@@ -1,4 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder} = require('discord.js');
+const util = require('../util/utility');
+
+const role_timeout = '1002867030904541225'
 
 const response = [
     'GLHF',
@@ -36,37 +39,37 @@ const ascii_faces = [
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('votetimeout')
-        .setDescription('Initiates a vote to mute a user for a specified amount of time.')
+        .setDescription('Initiates a vote to timeout a user for a randomized amount of time.')
         .addUserOption(option => 
             option.setName('target')
-                .setDescription('Select a user to mute.'))
+                .setDescription('Select a user to cast a vote to timeout.'))
         .setDefaultMemberPermissions(PermissionFlagsBits.MoveMembers | PermissionFlagsBits.MuteMembers),
 
     async execute(interaction) {
         const user = interaction.options.getUser('target');
+        const roles = interaction.options.getMember('target').roles
+        const pfp = user.avatarURL()
        
         let yesVotes = 0;
+        let rolesCache = roles;
         
         //Generate a random number from 1 to 60
-        const randomNumber = Math.floor(Math.random() * 60) + 1;
-        const seconds = 60
+        const randomNumber = Math.floor(Math.random() * 2) + 1;
+        const seconds = 5
 
-        console.log(interaction)
+       // console.log(interaction)
 
         // console.log(user)
 
-        // Grab id from users variable
-        const userId = user.id;
-
         //Checking if user is in a voice channel
-        const userCheck = interaction.guild.members.cache.get(userId);
-        if(!userCheck.voice.channel) {
-            interaction.reply(`${user} is not in a voice channel at this time. Vote will not be initiated.`);
-            return;
-        }   
+        // if(!util.userInVoiceChannel(interaction, user.id)) {
+        //     interaction.reply(`${user} is not in a voice channel at this time. Vote will not be initiated.`);
+        //     return;
+        // }   
 
         const embed = new EmbedBuilder()
             .setColor('#00ff00')
+            .setImage(pfp)
             .setTitle('Vote to mute ' + user.username)
             .setDescription('A vote to mute ' + user.username + ' for ' + randomNumber + ' minutes has been started.\n' +
             `${response[Math.floor(Math.random() * response.length)]} ${ascii_faces[2][Math.floor(Math.random() * ascii_faces[2].length)]}`)
@@ -75,12 +78,13 @@ module.exports = {
             content: seconds + 's left to vote',
             embeds: [embed],
             fetchReply: true
+
         })
         
         message.react('👍').then(() => message.react('👎'));
 
 		const filter = (reaction, user) => {
-			return ['👍', '👎'].includes(reaction.emoji.name) && user.id !== message.author.id && interaction.guild.members.cache.get(user.id).voice.channel;
+			return ['👍', '👎'].includes(reaction.emoji.name) && user.id !== message.author.id && util.userInVoiceChannel(interaction, user.id);
 		};
 
         const collector = message.createReactionCollector({filter,  time: seconds * 1000 });
@@ -92,9 +96,33 @@ module.exports = {
             console.log(`Collected ${reaction.emoji.name} from ${user.username}`);
         });
 
+        // TODO - Implement removing all roles to user and setting role to timeout
+        // TODO - Move member to timeout channel
         collector.on('end', collected => {
+
             console.log(`Collected all reactions from users. Yes: ${yesVotes} No: ${collected.size - yesVotes}`);
             
+           if( yesVotes / collected.size >= 0.75){
+
+                interaction.followUp(`Vote was successful for ${user.username} to be muted for ${randomNumber} minutes. ${yesVotes} / ${collected.size} votes`);
+                // Remove all roles from user, and cache them, then add the role_timeout to the user.
+
+
+                roles.cache.forEach(role => {
+                    roles.remove(role.id)
+                })
+                
+                roles.add(role_timeout)
+
+                setTimeout(() => {
+                    console.log('Removed timeout role for ' + user.username)
+                    roles.remove(role_timeout)
+                    rolesCache.forEach(role => {
+                        roles.add(role.id)
+                    })
+                }, randomNumber * 60* 1000);
+           }
+
         })
 
     }
