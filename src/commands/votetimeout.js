@@ -44,6 +44,8 @@ module.exports = {
 
     async execute(interaction) {
         const user = interaction.options.getUser('target');
+       
+        let yesVotes = 0;
         
         //Generate a random number from 1 to 60
         const randomNumber = Math.floor(Math.random() * 60) + 1;
@@ -84,11 +86,15 @@ module.exports = {
         const collector = message.createReactionCollector({filter,  time: seconds * 1000 });
 
         collector.on('collect', (reaction, user) => {
+            if(reaction.emoji.name === '👍') {
+                yesVotes++;
+            }
             console.log(`Collected ${reaction.emoji.name} from ${user.username}`);
         });
 
         collector.on('end', collected => {
-            console.log(`Collected ${collected.size} items`);
+            console.log(`Collected all reactions from users. Yes: ${yesVotes} No: ${collected.size - yesVotes}`);
+            
         })
 
     }
