@@ -26,6 +26,7 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setColor('#0099ff')
+            .setAuthor({ name: interaction.user.username, iconURL: interaction.user.avatarURL() })
             .setTitle(`Join ${interaction.user.username} to play ${activity.name.toUpperCase()}`)
             .setDescription(`Easy Room Join -> ${voiceChannel}\nEasy Member DM -> ${interaction.user}`)
             .addFields(
@@ -33,12 +34,11 @@ module.exports = {
                 {name: 'Players Asked', value: amount.toString(), inline: true},
                 {name: 'Voice Channel', value: voiceChannel.name, inline: true},
             )
-            .setThumbnail(member.user.avatarURL())
+            .setThumbnail(activity.assets.smallImageURL())
 
         interaction.reply( {
             content: '@everyone',
             embeds: [embed],
-            ephemeral: true,
             fetchReply: true
         })
     }

@@ -106,6 +106,8 @@ module.exports = {
         const rolesCache = util.cacheAllUsersRoles(roles, serverRoles)
         const cacheChannel = util.getUserVoiceChannel(interaction, user.id)
 
+
+        // TODO - Add a one vote system, players allowed to switch votes.
         collector.on('collect', (reaction, user) => {
             if(reaction.emoji.name === '👍') {
                 yesVotes++;
