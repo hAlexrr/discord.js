@@ -5,10 +5,8 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const client = new Client( { intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildMessages]});
+const client = new Client( { intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildPresences]});
 
-//Set status to watching
-// client.user.setActivity('Watching you sleep');
 // client.user.setStatus
 
 // Create events based on the files in the events folder

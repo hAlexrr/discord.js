@@ -52,9 +52,8 @@ module.exports = {
         const roles = member.roles
         const pfp = user.avatarURL()
 
-        console.log(interaction)
-       
         let yesVotes = 0;
+        let totalVotes = 0;
         
         //Generate a random number from 1 to 60
         const randomNumber = Math.floor(Math.random() * 2) + 1;
@@ -111,20 +110,18 @@ module.exports = {
             if(reaction.emoji.name === '👍') {
                 yesVotes++;
             }
+            totalVotes++;
             console.log(`Collected ${reaction.emoji.name} from ${user.username}`);
         });
 
-        // TODO - Move member to timeout channel
         collector.on('end', collected => {
 
-            console.log(`Collected all reactions from users. Yes: ${yesVotes} No: ${collected.size - yesVotes}`);
+            console.log(`Collected all reactions from users. Yes: ${yesVotes} No: ${totalVotes - yesVotes}`);
             
             //If more than half of the votes are yes, timeout the user
-            if( yesVotes / collected.size >= 0.75){
+            if( yesVotes / totalVotes >= 0.75){
 
-                // Get all roles on the server and cache them
-            
-                interaction.followUp(`Vote was successful for ${user} to be muted for ${randomNumber} minutes. ${yesVotes} / ${collected.size} votes`);
+                interaction.followUp(`Vote was successful for ${user} to be muted for ${randomNumber} minutes. ${yesVotes} / ${totalVotes} votes`);
 
                 // // Check if user is in role_timeout
                 // if(util.userHasRole(roles, role_timeout)){
@@ -148,9 +145,6 @@ module.exports = {
                 }, 1500);
 
                 setTimeout(() => {
-                    console.log('Removed timeout role for ' + user.username)
-                    console.log(cacheChannel)
-
                     //setTimeout Remove role_timeout from user 5ms after timeout
                     setTimeout(() => {
                         util.removeTimeoutRole(roles, role_timeout)

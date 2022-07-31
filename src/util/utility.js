@@ -21,7 +21,7 @@ module.exports = {
     },
 
     rolesThatBreak() {
-        return ['782534818042871828', '782540243626229760', '782534818025046055'];
+        return ['782534818042871828', '782540243626229760', '782534818025046055', '783934865224499203'];
     },
 
     removeAllUsersRoles(userRoles, serverRoles){
@@ -99,7 +99,10 @@ module.exports = {
         setTimeout(() => {
             interaction.deleteReply()
         }, 10000);
-    }
+    },
 
+    getUserActivity(member){
+        return member.presence.activities[0];
+    }
 
 }
