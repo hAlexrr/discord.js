@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { getUserActivity, getUserVoiceChannel, deleteReply } = require('../util/utility');
+const { getUserActivity, getUserVoiceChannel, deleteReply, getRandomMeme } = require('../util/utility');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -10,9 +10,11 @@ module.exports = {
                 .setDescription('The amount of players you need')
                 ),
     
-    execute(interaction) {
+    async execute(interaction) {
         const amount = interaction.options.getInteger('amount');
         const member = interaction.guild.members.cache.get(interaction.user.id)
+
+        let memeURL = ''
 
         const activity = getUserActivity(member);
         const voiceChannel = getUserVoiceChannel(interaction, interaction.user.id);
@@ -23,6 +25,8 @@ module.exports = {
             return;
         }
 
+        if(activity.assests == null)
+            memeURL = await getRandomMeme();
 
         const embed = new EmbedBuilder()
             .setColor('#0099ff')
@@ -34,7 +38,7 @@ module.exports = {
                 {name: 'Players Asked', value: amount.toString(), inline: true},
                 {name: 'Voice Channel', value: voiceChannel.name, inline: true},
             )
-            .setThumbnail(activity.assets.smallImageURL())
+            .setThumbnail( activity.assests === null ? activity.assets.smallImageURL() : memeURL.url)
 
         interaction.reply( {
             content: '@everyone',
