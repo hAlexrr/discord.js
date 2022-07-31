@@ -1,3 +1,5 @@
+const axios = require('axios');
+
 module.exports = {
     userInVoiceChannel(interaction, userId) {      
         const userCheck = interaction.guild.members.cache.get(userId);
@@ -103,6 +105,18 @@ module.exports = {
 
     getUserActivity(member){
         return member.presence.activities[0];
+    },
+
+    getRandomMeme() {
+        const promise = axios('https://api.imgflip.com/get_memes')
+
+        const dataPromise = promise.then(response => response.data )
+
+        // Random number based on the length of dataPromise
+        const randomMeme = dataPromise.then(data => data.data.memes[Math.floor(Math.random() * data.data.memes.length)])
+
+        return randomMeme.url;
+        
     }
 
 }
