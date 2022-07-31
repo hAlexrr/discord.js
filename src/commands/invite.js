@@ -25,6 +25,8 @@ module.exports = {
             return;
         }
 
+        console.log(activity)
+
         if(activity.assests == null)
             memeURL = await getRandomMeme();
 
@@ -38,7 +40,7 @@ module.exports = {
                 {name: 'Players Asked', value: amount.toString(), inline: true},
                 {name: 'Voice Channel', value: voiceChannel.name, inline: true},
             )
-            .setThumbnail( activity.assests === null ? activity.assets.smallImageURL() : memeURL.url)
+            .setThumbnail( activity.assests !== null ? activity.assets.smallImageURL() : memeURL.url)
 
         interaction.reply( {
             content: '@everyone',

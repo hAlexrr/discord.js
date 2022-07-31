@@ -56,8 +56,8 @@ module.exports = {
         let totalVotes = 0;
         
         //Generate a random number from 1 to 60
-        const randomNumber = Math.floor(Math.random() * 2) + 1;
-        const seconds = 5
+        const randomNumber = Math.floor(Math.random() * 60) + 1;
+        const seconds = 60
 
         if(user.id == interaction.user.id){
             interaction.reply('You cannot vote to timeout yourself.', )

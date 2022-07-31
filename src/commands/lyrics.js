@@ -53,7 +53,7 @@ module.exports = {
                 }
             
             interaction.reply({
-                content: 'Test',
+                content: '',
                 embeds: [embed],
                 fetchReply: true
             });
