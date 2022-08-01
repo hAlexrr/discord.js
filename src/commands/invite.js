@@ -29,18 +29,24 @@ module.exports = {
 
         if(activity.assests == null)
             memeURL = await getRandomMeme();
+        
+        console.log(memeURL)
 
         const embed = new EmbedBuilder()
             .setColor('#0099ff')
-            .setAuthor({ name: interaction.user.username, iconURL: interaction.user.avatarURL() })
-            .setTitle(`Join ${interaction.user.username} to play ${activity.name.toUpperCase()}`)
             .setDescription(`Easy Room Join -> ${voiceChannel}\nEasy Member DM -> ${interaction.user}`)
             .addFields(
                 {name: 'Game being played', value: activity.name.toUpperCase(), inline: true},
                 {name: 'Players Asked', value: amount.toString(), inline: true},
                 {name: 'Voice Channel', value: voiceChannel.name, inline: true},
-            )
-            .setThumbnail( activity.assests !== null ? activity.assets.smallImageURL() : memeURL.url)
+                )
+        try{
+            embed.setAuthor({ name: interaction.user.username, iconURL: interaction.user.avatarURL() })
+            embed.setTitle(`Join ${interaction.user.username} to play ${activity.name.toUpperCase()}`)
+            embed.setThumbnail( activity.assests !== null ? activity.assets.smallImageURL() : memeURL.url)
+        } catch (e) {
+            console.log(e)
+        }
 
         interaction.reply( {
             content: '@everyone',
