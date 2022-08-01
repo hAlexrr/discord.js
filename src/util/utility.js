@@ -117,6 +117,10 @@ module.exports = {
 
         return randomMeme.url;
         
+    },
+
+    blankEmbedLine(){
+        return { name: '\u200B', value: '\u200B' }
     }
 
 }
