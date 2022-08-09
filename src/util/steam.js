@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 
 dotenv.config()
 
-getAllSteamGames('Counter Strike')
+// getAllSteamGames('Counter Strike')
 
 module.exports = {
     getAllSteamGames,
