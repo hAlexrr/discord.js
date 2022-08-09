@@ -34,5 +34,5 @@ for ( const file of commandFiles ) {
 
     client.commands.set(command.data.name, command);
 }
-console.log(process.env.DISCORD_TOKEN)
+
 client.login(process.env.DISCORD_TOKEN);
